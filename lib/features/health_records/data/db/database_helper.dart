@@ -20,8 +20,9 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _onUpgrade,
     );
   }
 
@@ -29,6 +30,7 @@ class DatabaseHelper {
     const idType = 'INTEGER PRIMARY KEY AUTOINCREMENT';
     const textType = 'TEXT NOT NULL';
     const intType = 'INTEGER NOT NULL';
+    const realType = 'REAL NOT NULL';
 
     await db.execute('''
       CREATE TABLE health_records (
@@ -40,8 +42,33 @@ class DatabaseHelper {
       )
     ''');
 
+    await db.execute('''
+      CREATE TABLE bmi_history (
+        id $idType,
+        date $textType,
+        weight $realType,
+        height $realType,
+        bmi $realType
+      )
+    ''');
+
     // Insert dummy data on first launch
     await _insertDummyData(db);
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      const realType = 'REAL NOT NULL';
+      await db.execute('''
+        CREATE TABLE bmi_history (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          date TEXT NOT NULL,
+          weight $realType,
+          height $realType,
+          bmi $realType
+        )
+      ''');
+    }
   }
 
   Future<void> _insertDummyData(Database db) async {
@@ -146,6 +173,43 @@ class DatabaseHelper {
       return HealthRecord.fromMap(maps.first);
     }
     return null;
+  }
+
+  // BMI History Methods
+  Future<int> insertBMI(Map<String, dynamic> bmiMap) async {
+    final db = await database;
+    return await db.insert('bmi_history', bmiMap);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllBMIHistory() async {
+    final db = await database;
+    return await db.query(
+      'bmi_history',
+      orderBy: 'date DESC',
+    );
+  }
+
+  Future<int> deleteBMI(int id) async {
+    final db = await database;
+    return await db.delete(
+      'bmi_history',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // Weekly Summary Methods
+  Future<List<Map<String, dynamic>>> getRecordsForDateRange(
+    String startDate,
+    String endDate,
+  ) async {
+    final db = await database;
+    return await db.query(
+      'health_records',
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [startDate, endDate],
+      orderBy: 'date ASC',
+    );
   }
 
   Future<void> close() async {

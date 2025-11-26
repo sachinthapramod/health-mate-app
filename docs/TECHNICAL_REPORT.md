@@ -37,6 +37,30 @@ HealthMate is a cross-platform mobile application built with Flutter that enable
    - Visual cards with icons and color coding
    - Real-time data updates
 
+### Extra Features
+
+7. **Weekly Summary Graphs**
+   - Interactive charts using fl_chart
+   - Bar charts for Steps and Calories
+   - Line chart for Water Intake
+   - Last 7 days data visualization
+   - Smooth animations and tooltips
+   - Auto-aggregation by day
+
+8. **Daily Notifications**
+   - Daily reminder at 9:00 AM
+   - Water reminder every 3 hours
+   - User-configurable from Settings
+   - Permission handling
+   - Persistent preferences using SharedPreferences
+
+9. **BMI Calculator**
+   - Calculate BMI from height and weight
+   - Visual BMI indicator with color coding
+   - Category classification (Underweight, Normal, Overweight, Obese)
+   - Save BMI history to database
+   - View and delete BMI records
+
 ## Architecture
 
 ### Clean Architecture Layers
@@ -107,6 +131,76 @@ lib/
 └── main.dart
 ```
 
+## Extra Features Details
+
+### Weekly Summary Graphs
+
+The Weekly Summary feature provides visual insights into health trends over the past 7 days:
+
+**Implementation:**
+- Repository: `WeeklySummaryRepository` queries records for the last 7 days
+- Provider: `weeklySummaryProvider` manages state with Riverpod
+- Screen: `WeeklySummaryScreen` displays 3 interactive charts
+
+**Charts:**
+1. **Steps Bar Chart**: Shows daily step count with green color coding
+2. **Calories Bar Chart**: Displays daily calorie burn in red
+3. **Water Intake Line Chart**: Visualizes water consumption trend in blue
+
+**Features:**
+- Auto-aggregates multiple records per day
+- Fills missing days with zero values
+- Smooth animations (500ms duration)
+- Interactive tooltips on touch
+- Responsive design with proper scaling
+
+### Daily Notifications
+
+**Architecture:**
+- `NotificationService`: Handles local notifications using `flutter_local_notifications`
+- `NotificationManager`: Manages notification preferences and scheduling
+- Uses `timezone` package for accurate scheduling
+- Preferences stored with `SharedPreferences`
+
+**Notification Types:**
+1. **Daily Reminder**: Scheduled for 9:00 AM daily
+   - Message: "Don't forget to log your health today!"
+   - Repeats every day at the same time
+
+2. **Water Reminder**: Every 3 hours
+   - Message: "Time to drink water! Stay hydrated 💧"
+   - Configurable interval
+
+**Permissions:**
+- Android: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`
+- iOS: Alert, Badge, Sound permissions
+
+### BMI Calculator
+
+**Formula:**
+```
+BMI = weight (kg) / (height (m))²
+BMI = weight / ((height/100)²)
+```
+
+**Categories:**
+- Underweight: BMI < 18.5 (Blue)
+- Normal: 18.5 ≤ BMI < 25 (Green)
+- Overweight: 25 ≤ BMI < 30 (Orange)
+- Obese: BMI ≥ 30 (Red)
+
+**Database Schema:**
+- Table: `bmi_history`
+- Fields: id, date, weight, height, bmi
+- Stores calculation history for tracking
+
+**Features:**
+- Real-time BMI calculation
+- Visual indicator bar with color coding
+- Save results to database
+- View history with date and category badges
+- Delete individual records
+
 ## Database Schema
 
 ### Table: health_records
@@ -118,6 +212,16 @@ lib/
 | steps    | INTEGER | NOT NULL             |
 | calories | INTEGER | NOT NULL             |
 | water    | INTEGER | NOT NULL             |
+
+### Table: bmi_history
+
+| Field    | Type    | Constraints           |
+|----------|---------|----------------------|
+| id       | INTEGER | PRIMARY KEY AUTOINCREMENT |
+| date     | TEXT    | NOT NULL             |
+| weight   | REAL    | NOT NULL             |
+| height   | REAL    | NOT NULL             |
+| bmi      | REAL    | NOT NULL             |
 
 ### Database Operations
 
@@ -226,6 +330,26 @@ await repository.deleteRecord(recordId);
    - Numeric validation
    - Negative number validation
 
+### Extra Features Test Cases
+
+1. **BMI Calculation Tests**
+   - Verify BMI formula correctness
+   - Test category classification
+   - Validate color coding
+   - Test edge cases (zero, negative values)
+
+2. **Notification Scheduling Tests**
+   - Verify daily notification scheduling
+   - Test water reminder intervals
+   - Validate permission handling
+   - Test enable/disable functionality
+
+3. **Weekly Summary Tests**
+   - Verify 7-day date range calculation
+   - Test data aggregation by day
+   - Validate missing day handling
+   - Test chart data formatting
+
 ## Issues & Fixes
 
 ### Issue 1: Database Path on Windows
@@ -243,6 +367,20 @@ await repository.deleteRecord(recordId);
 
 **Solution**: Implemented proper state refresh using `loadRecords()` after each operation in the StateNotifier.
 
+## Dependencies
+
+### Core Dependencies
+- `flutter_riverpod: ^2.5.1` - State management
+- `sqflite: ^2.3.0` - Local database
+- `path_provider: ^2.1.1` - File system paths
+- `intl: ^0.19.0` - Date formatting
+
+### Extra Features Dependencies
+- `fl_chart: ^0.66.0` - Charts and graphs
+- `flutter_local_notifications: ^17.0.0` - Local notifications
+- `shared_preferences: ^2.2.2` - User preferences storage
+- `timezone: ^0.9.4` - Timezone handling (transitive)
+
 ## References
 
 Flutter Team. (2024). *Flutter Documentation*. https://docs.flutter.dev/
@@ -254,4 +392,10 @@ SQLite Team. (2024). *SQLite Documentation*. https://www.sqlite.org/docs.html
 Material Design Team. (2024). *Material Design 3*. https://m3.material.io/
 
 Google. (2024). *sqflite Package*. https://pub.dev/packages/sqflite
+
+Iman Khoshabi. (2024). *fl_chart Package*. https://pub.dev/packages/fl_chart
+
+Maido Kaara. (2024). *flutter_local_notifications Package*. https://pub.dev/packages/flutter_local_notifications
+
+Flutter Team. (2024). *shared_preferences Package*. https://pub.dev/packages/shared_preferences
 

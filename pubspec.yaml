@@ -23,6 +23,15 @@ dependencies:
   # Charts
   fl_chart: ^0.66.0
   
+  # Notifications
+  flutter_local_notifications: ^17.0.0
+  
+  # Preferences
+  shared_preferences: ^2.2.2
+  
+  # Timezone
+  timezone: ^0.9.4
+  
   # Icons
   cupertino_icons: ^1.0.6
 

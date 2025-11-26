@@ -83,18 +83,29 @@ flutter run
 
 ### Building APK
 
-To build an APK for Android:
-
+**Debug APK:**
 ```bash
 flutter build apk
 ```
 
+**Release APK:**
+```bash
+flutter build apk --release
+```
+
 The APK will be generated at: `build/app/outputs/flutter-apk/app-release.apk`
 
-For a split APK (smaller file size):
+**For Google Play Store (App Bundle):**
 ```bash
-flutter build apk --split-per-abi
+flutter build appbundle --release
 ```
+
+**Split APK (smaller file size):**
+```bash
+flutter build apk --split-per-abi --release
+```
+
+**Full Release Guide:** See [docs/RELEASE_GUIDE.md](docs/RELEASE_GUIDE.md) for complete release instructions including signing and publishing.
 
 ### Building for iOS
 
