@@ -33,7 +33,8 @@ class _RecordsListScreenState extends ConsumerState<RecordsListScreen> {
       setState(() {
         _selectedFilterDate = picked;
       });
-      final dateString = picked.toIso8601String();
+      // Use date at midnight to ensure proper matching
+      final dateString = DateTime(picked.year, picked.month, picked.day).toIso8601String();
       ref.read(healthRecordNotifierProvider.notifier).searchByDate(dateString);
     }
   }

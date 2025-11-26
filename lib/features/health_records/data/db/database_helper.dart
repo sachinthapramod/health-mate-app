@@ -113,10 +113,15 @@ class DatabaseHelper {
 
   Future<List<HealthRecord>> getRecordsByDate(String date) async {
     final db = await database;
+    // Parse the date string to get the date part only
+    final dateTime = DateTime.parse(date);
+    final startDate = DateTime(dateTime.year, dateTime.month, dateTime.day).toIso8601String();
+    final endDate = DateTime(dateTime.year, dateTime.month, dateTime.day, 23, 59, 59).toIso8601String();
+    
     final result = await db.query(
       'health_records',
-      where: 'date = ?',
-      whereArgs: [date],
+      where: 'date >= ? AND date <= ?',
+      whereArgs: [startDate, endDate],
       orderBy: 'date DESC',
     );
     return result.map((map) => HealthRecord.fromMap(map)).toList();

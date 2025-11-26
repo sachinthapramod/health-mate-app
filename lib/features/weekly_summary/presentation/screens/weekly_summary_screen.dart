@@ -137,6 +137,19 @@ class WeeklySummaryScreen extends ConsumerWidget {
                     touchTooltipData: BarTouchTooltipData(
                       tooltipRoundedRadius: 8,
                       tooltipBgColor: AppTheme.stepsColor,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final index = group.x.toInt();
+                        if (index < 0 || index >= records.length) return null;
+                        final record = records[index];
+                        final date = DateTime.parse(record.date);
+                        return BarTooltipItem(
+                          '${DateFormat('EEE').format(date)}\n${record.steps} steps',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   titlesData: FlTitlesData(
@@ -246,6 +259,19 @@ class WeeklySummaryScreen extends ConsumerWidget {
                     touchTooltipData: BarTouchTooltipData(
                       tooltipBgColor: AppTheme.caloriesColor,
                       tooltipRoundedRadius: 8,
+                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                        final index = group.x.toInt();
+                        if (index < 0 || index >= records.length) return null;
+                        final record = records[index];
+                        final date = DateTime.parse(record.date);
+                        return BarTooltipItem(
+                          '${DateFormat('EEE').format(date)}\n${record.calories} kcal',
+                          const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      },
                     ),
                   ),
                   titlesData: FlTitlesData(
@@ -353,6 +379,26 @@ class WeeklySummaryScreen extends ConsumerWidget {
                     enabled: true,
                     touchTooltipData: LineTouchTooltipData(
                       tooltipBgColor: AppTheme.waterColor,
+                      getTooltipItems: (touchedSpots) {
+                        return touchedSpots.map((spot) {
+                          final index = spot.x.toInt();
+                          if (index < 0 || index >= records.length) {
+                            return const LineTooltipItem(
+                              '',
+                              TextStyle(),
+                            );
+                          }
+                          final record = records[index];
+                          final date = DateTime.parse(record.date);
+                          return LineTooltipItem(
+                            '${DateFormat('EEE').format(date)}\n${spot.y.toInt()} ml',
+                            const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        }).toList();
+                      },
                     ),
                   ),
                   titlesData: FlTitlesData(

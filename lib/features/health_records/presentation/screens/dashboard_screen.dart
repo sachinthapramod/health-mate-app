@@ -10,15 +10,24 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final todayRecordAsync = ref.watch(todayRecordProvider);
+    // Use the notifier provider so changes after add/update are reflected immediately
+    final recordsAsync = ref.watch(healthRecordNotifierProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('HealthMate Dashboard'),
         centerTitle: true,
       ),
-      body: todayRecordAsync.when(
-        data: (record) {
+      body: recordsAsync.when(
+        data: (records) {
+          // Find today's record from the loaded list
+          final todayRecords = records
+              .where((r) => DateFormatter.isToday(r.date))
+              .toList()
+            ..sort((a, b) => b.date.compareTo(a.date));
+
+          final record = todayRecords.isNotEmpty ? todayRecords.first : null;
+
           if (record == null) {
             return Center(
               child: Column(
@@ -51,6 +60,73 @@ class DashboardScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Hero / Header Card
+                Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.secondary,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.15),
+                          ),
+                          child: const Icon(
+                            Icons.favorite_rounded,
+                            size: 36,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Welcome back 👋',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Here’s your health snapshot for today.',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
                 Text(
                   'Today\'s Summary',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
