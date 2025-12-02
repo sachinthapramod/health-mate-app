@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_mate_app/core/theme/app_theme.dart';
 import 'package:health_mate_app/core/notifications/notification_manager.dart';
+import 'package:health_mate_app/core/providers/theme_provider.dart';
+import 'package:health_mate_app/core/services/user_preferences_service.dart';
+import 'package:health_mate_app/core/widgets/welcome_dialog.dart';
 import 'package:health_mate_app/features/health_records/presentation/screens/dashboard_screen.dart';
 import 'package:health_mate_app/features/health_records/presentation/screens/add_record_screen.dart';
 import 'package:health_mate_app/features/health_records/presentation/screens/records_list_screen.dart';
@@ -22,31 +25,53 @@ void main() async {
   );
 }
 
-class HealthMateApp extends StatelessWidget {
+class HealthMateApp extends ConsumerWidget {
   const HealthMateApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
+    
     return MaterialApp(
       title: 'HealthMate',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       debugShowCheckedModeBanner: false,
       home: const MainNavigationScreen(),
     );
   }
 }
 
-class MainNavigationScreen extends StatefulWidget {
+class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({super.key});
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   int _selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLaunch();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    final isFirstLaunch = await UserPreferencesService.isFirstLaunch();
+    if (isFirstLaunch && mounted) {
+      // Show welcome dialog after first frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const WelcomeDialog(),
+        );
+      });
+    }
+  }
 
   static final List<Widget> _screens = [
     const DashboardScreen(),

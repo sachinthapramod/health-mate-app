@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:health_mate_app/core/widgets/health_metric_card.dart';
 import 'package:health_mate_app/core/theme/app_theme.dart';
 import 'package:health_mate_app/core/utils/date_formatter.dart';
+import 'package:health_mate_app/core/services/user_preferences_service.dart';
 import '../../presentation/providers/health_record_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -10,7 +11,6 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Use the notifier provider so changes after add/update are reflected immediately
     final recordsAsync = ref.watch(healthRecordNotifierProvider);
 
     return Scaffold(
@@ -98,19 +98,28 @@ class DashboardScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Welcome back 👋',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              FutureBuilder<String?>(
+                                future: UserPreferencesService.getUserName(),
+                                builder: (context, snapshot) {
+                                  final name = snapshot.data;
+                                  final text = (name != null && name.isNotEmpty)
+                                      ? 'Welcome back, $name! 👋'
+                                      : 'Welcome back 👋';
+                                  return Text(
+                                    text,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                  );
+                                },
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Here’s your health snapshot for today.',
+                                'Here\'s your health snapshot for today.',
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyMedium
